@@ -1,32 +1,14 @@
-const sqlite3 = require("sqlite3").verbose();
-const path = require("path");
+const { Pool } = require("pg");
 
-// Create / open database
-const db = new sqlite3.Database(
-  path.join(__dirname, "findersplace.db"),
-  (err) => {
-    if (err) {
-      console.error("❌ Error opening database", err.message);
-    } else {
-      console.log("✅ SQLite database connected");
-    }
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
   }
-);
-
-// Create table
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT,
-      location TEXT,
-      image TEXT,
-      contactType TEXT,
-      contact TEXT,
-      createdAt INTEGER
-    )
-  `);
 });
 
-module.exports = db;
+pool.on("connect", () => {
+  console.log("✅ PostgreSQL connected");
+});
+
+module.exports = pool;
